@@ -1,10 +1,11 @@
 {
     "configurations": [
         {
-            "type": "cargo",
+            "type": "command",
             "name": "Build",
-            "cargoArgs": [
-                "build"
+            "program": "bash",
+            "args": [
+                "make.sh",
             ],
         },
         {
@@ -12,7 +13,7 @@
             "name": "Build & Run",
             "program": "bash",
             "args": [
-                "make",
+                "make.sh",
                 "buildwithrun"
             ],
         }
