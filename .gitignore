@@ -1,0 +1,4 @@
+Cargo.lock
+/target
+run.sh
+make

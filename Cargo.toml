@@ -1,0 +1,11 @@
+[package]
+name = "fenghuang"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+futures = "0.3"
+serde_json = "1"
+serde = "1"
+tokio = { version = "1", features = ["full"] }
+vkclient = { git = "https://github.com/Mnwa/vkclient" }
