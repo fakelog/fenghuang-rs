@@ -3,15 +3,16 @@ use serde_json::Value;
 
 #[derive(Deserialize, Debug)]
 pub struct Event {
-    pub(crate) event_id: String,
-    pub(crate) group_id: usize,
-    pub(crate) object: serde_json::Value,
     pub(crate) r#type: String,
+    pub(crate) event_id: String,
     pub(crate) v: String,
+    pub(crate) object: serde_json::Value,
+    pub(crate) group_id: usize,
 }
 
 impl Event {
-    pub fn to_event(v: Value) -> Self {
+
+    pub fn get_event(v: Value) -> Self {
         serde_json::from_value(v).unwrap()
     }
 }
