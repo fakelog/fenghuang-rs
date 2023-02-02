@@ -14,7 +14,16 @@
             "program": "bash",
             "args": [
                 "make.sh",
-                "buildwithrun"
+                "-br"
+            ],
+        },
+        {
+            "type": "command",
+            "name": "Run",
+            "program": "bash",
+            "args": [
+                "make.sh",
+                "-r"
             ],
         }
     ]
