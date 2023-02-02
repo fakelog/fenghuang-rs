@@ -1,5 +1,5 @@
 
-struct Error {}
+pub struct Error {}
 
 impl Error {
 
