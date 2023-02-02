@@ -4,19 +4,17 @@ use vkclient::VkApiError;
 
 pub mod event;
 pub mod longpoll;
-pub mod messages;
+mod messages;
 
-pub use crate::api::{
-    event::Event,
-    messages::Messages
-};
+pub use crate::api::event::Event;
+pub use crate::api::messages::Messages;
 
 pub struct Api {}
 
 impl Api {
 
     pub(crate) fn new_event(v: Value) {
-        let event = Event::to_event(v);
+        let event = Event::get_event(v);
 
         if event.r#type == "message_new" {
             Messages::new_message(event.object);
@@ -25,7 +23,7 @@ impl Api {
     }
 
     pub(crate) fn new_error(e: VkApiError) {
-
+        print!("{:?}", e)
     }
 
 }

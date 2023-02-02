@@ -1,10 +1,9 @@
 use futures::stream::StreamExt;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use vkclient::{longpoll::LongPollRequest, VkApi, VkApiWrapper};
+use vkclient::{longpoll::LongPollRequest, VkApi, VkApiWrapper, Compression};
 use tokio::runtime;
-
-use crate::Bot;
+use super::Api;
 
 pub struct LongPoll {}
 
@@ -16,26 +15,33 @@ impl LongPoll {
         .build()
         .unwrap();
 
+        println!("Bot started...");
+
         runtime.block_on(async move {
-            let client: VkApi = vkclient::VkApiBuilder::new(access_token).into();
+            let client: VkApi = vkclient::VkApiBuilder::new(access_token)
+                .with_compression(Compression::Zstd)
+                .into();
 
             let BotLongPollResponse { key, server, ts } = client
-            .send_request_with_wrapper(BotLongPollRequest { group_id })
-            .await
-            .unwrap();
+                .send_request_with_wrapper(BotLongPollRequest { group_id })
+                .await
+                .unwrap();
 
             client
-            .longpoll()
-            .subscribe::<_, Value>(LongPollRequest {
-                key,
-                server,
-                ts,
-                wait: 25,
-                additional_params: (),
-            })
-            .for_each(|r| async move {
-                Bot::resources(r);
-            }).await;
+                .longpoll()
+                .subscribe::<_, Value>(LongPollRequest {
+                    key,
+                    server,
+                    ts,
+                    wait: 25,
+                    additional_params: (),
+                })
+                .for_each(|r| async move {
+                    match r {
+                        Ok(val) => Api::new_event(val),
+                        Err(err) => Api::new_error(err)
+                    }
+                }).await;
         });
     }
 }
