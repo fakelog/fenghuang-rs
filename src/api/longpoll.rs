@@ -3,19 +3,24 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use vkclient::{longpoll::LongPollRequest, VkApi, VkApiWrapper, Compression};
 use tokio::runtime;
+
 use super::Api;
 
 pub struct LongPoll {}
 
 impl LongPoll {
     pub fn init(access_token: String, group_id: String) {
-
-        let group_id = group_id.parse::<usize>().expect("Не удалось преобразовать ID группы в usize");
+        let group_id = match group_id.parse::<usize>() {
+            Ok(id) => id,
+            Err(err) => {
+                panic!("Failed to parse group ID: {}", err);
+            }
+        };
 
         let runtime = runtime::Builder::new_multi_thread()
-        .enable_all()
-        .build()
-        .unwrap();
+            .enable_all()
+            .build()
+            .unwrap();
 
         println!("Bot started...");
 
@@ -24,10 +29,17 @@ impl LongPoll {
                 .with_compression(Compression::Zstd)
                 .into();
 
-            let BotLongPollResponse { key, server, ts } = client
+            let long_poll_response = match client
                 .send_request_with_wrapper(BotLongPollRequest { group_id })
                 .await
-                .unwrap();
+            {
+                Ok(response) => response,
+                Err(err) => {
+                    panic!("Failed to get Long Poll server information: {}", err);
+                }
+            };
+
+            let LongPollResponse { key, server, ts } = long_poll_response;
 
             client
                 .longpoll()
@@ -36,33 +48,33 @@ impl LongPoll {
                     server,
                     ts,
                     wait: 25,
-                    additional_params: (),
+                    additional_params: serde_json::json!({}),
                 })
                 .for_each(|r| async move {
                     match r {
                         Ok(val) => Api::new_event(val),
-                        Err(err) => Api::new_error(err)
+                        Err(err) => Api::new_error(err),
                     }
-                }).await;
+                })
+                .await;
         });
     }
 }
 
-#[derive(Serialize, Debug)]
+#[derive(Serialize, Deserialize, Debug)]
 struct BotLongPollRequest {
     group_id: usize,
 }
 
-#[allow(dead_code)]
-#[derive(Deserialize, Debug)]
-struct BotLongPollResponse {
+#[derive(Serialize, Deserialize, Debug)]
+struct LongPollResponse {
     key: String,
     server: String,
     ts: String,
 }
 
 impl VkApiWrapper for BotLongPollRequest {
-    type Response = BotLongPollResponse;
+    type Response = LongPollResponse;
 
     fn get_method_name() -> &'static str {
         "groups.getLongPollServer"
