@@ -8,7 +8,9 @@ use super::Api;
 pub struct LongPoll {}
 
 impl LongPoll {
-    pub fn init(access_token: String, group_id: usize) {
+    pub fn init(access_token: String, group_id: String) {
+
+        let group_id = group_id.parse::<usize>().expect("Не удалось преобразовать ID группы в usize");
 
         let runtime = runtime::Builder::new_multi_thread()
         .enable_all()

@@ -1,11 +1,18 @@
+extern crate dotenv;
+
 mod api;
 mod bot;
 
+use dotenv::dotenv;
+use std::env;
 use crate::api::longpoll::LongPoll;
 
 fn main() {
-    let access_token = std::env::var("SERVICE_TOKEN").unwrap();
-    let group_id = std::env::var("GROUP_ID").unwrap().parse().unwrap();
+    // load env var's
+    dotenv().ok();
+
+    let access_token = env::var("TOKEN").expect("Токена не найдено");
+    let group_id = env::var("GROUP_ID").expect("ID группы не найдено");
 
     LongPoll::init(access_token, group_id);
 }
